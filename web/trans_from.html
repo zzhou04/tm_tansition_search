@@ -1,1 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trackmania Block Selector</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
 
+    .folder {
+      position: relative;
+      display: inline-block;
+      margin-right: 20px;
+    }
+
+    .folder > .folder-name {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .folder-content {
+      display: none;
+      position: absolute;
+      background-color: #f9f9f9;
+      min-width: 160px;
+      border: 1px solid #ccc;
+      z-index: 1;
+    }
+
+    .folder:hover > .folder-content {
+      display: block;
+    }
+
+    .folder-content .folder,
+    .folder-content .item {
+      padding: 10px;
+      color: black;
+      text-decoration: none;
+      display: block;
+    }
+
+    .folder-content .folder:hover,
+    .folder-content .item:hover {
+      background-color: #ddd;
+    }
+
+    .item {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Select a Block</h2>
+
+<!-- Root Folder -->
+<div class="folder">
+  <div class="folder-name">Road</div>
+  <div class="folder-content">
+    
+    <!-- Subfolder -->
+    <div class="folder">
+      <div class="folder-name">Straight</div>
+      <div class="folder-content">
+        <div class="item" data-block-id="road_straight_1">Straight 1</div>
+        <div class="item" data-block-id="road_straight_2">Straight 2</div>
+      </div>
+    </div>
+
+    <!-- Another Subfolder -->
+    <div class="folder">
+      <div class="folder-name">Curves</div>
+      <div class="folder-content">
+        <div class="item" data-block-id="road_curve_1">Curve Left</div>
+        <div class="item" data-block-id="road_curve_2">Curve Right</div>
+      </div>
+    </div>
+
+    <!-- Items directly under "Road" -->
+    <div class="item" data-block-id="road_start">Start Block</div>
+  </div>
+</div>
+
+<!-- Another root folder -->
+<div class="folder">
+  <div class="folder-name">Terrain</div>
+  <div class="folder-content">
+    <div class="item" data-block-id="terrain_grass">Grass</div>
+    <div class="item" data-block-id="terrain_dirt">Dirt</div>
+  </div>
+</div>
+
+<script>
+  // Example event listener to show block ID when clicked
+  document.querySelectorAll('.item').forEach(item => {
+    item.addEventListener('click', () => {
+      alert("Selected block ID: " + item.dataset.blockId);
+    });
+  });
+</script>
+
+</body>
+</html>
