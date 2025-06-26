@@ -64,13 +64,12 @@ function createEntry(key, node, path) {
 function toggleFolder(path, parentContainer, children) {
   let existing = parentContainer.querySelector(`[data-subpath="${path}"]`);
   
-  // Collapse if already shown
   if (existing) {
     existing.remove();
     return;
   }
 
-  // Remove all subfolders of siblings at this level
+  // Remove all siblings' open subfolders at this level or deeper
   const level = path.split("/").length;
   const siblings = browser.querySelectorAll(`[data-subpath]`);
   siblings.forEach(el => {
@@ -80,9 +79,9 @@ function toggleFolder(path, parentContainer, children) {
     }
   });
 
-  // Create container for children
+  // Create container for children horizontally below parent
   const subContainer = document.createElement("div");
-  subContainer.className = "entry";
+  subContainer.className = "children";
   subContainer.dataset.subpath = path;
 
   for (const childKey in children) {
