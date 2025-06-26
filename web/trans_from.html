@@ -42,24 +42,15 @@
 
     #browser {
       padding: 16px;
-    }
-
-    .entry {
       display: flex;
-      flex-direction: column; /* stack parent and children vertically */
-      margin-top: 6px;
+      flex-direction: column; /* vertical stack of rows */
+      gap: 12px;
     }
 
-    .entry > button {
-      align-self: flex-start; /* keep button aligned left */
-      margin-bottom: 4px;
-    }
-
-    .children {
+    .level-row {
       display: flex;
-      flex-direction: row; /* children laid out horizontally */
-      margin-left: 40px; /* indent children */
-      gap: 8px; /* space between children */
+      gap: 12px;
+      /* horizontally lay out siblings */
     }
 
     button {
@@ -69,7 +60,6 @@
       cursor: pointer;
       font-size: 15px;
       border-radius: 6px;
-      margin: 4px 0;
       white-space: nowrap;
     }
 
@@ -79,10 +69,6 @@
 
     .folder-label {
       font-weight: bold;
-    }
-
-    .hidden {
-      display: none;
     }
   </style>
 </head>
