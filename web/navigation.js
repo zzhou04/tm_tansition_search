@@ -1,4 +1,3 @@
-
 const blocks = {
   "1": {
     label: "Road",
@@ -40,47 +39,55 @@ const blocks = {
 };
 
 const browser = document.getElementById("browser");
-let path = [];
+const expanded = {}; // Keeps track of expanded nodes by key
 
-function renderLevel(currentLevel) {
+function render() {
   browser.innerHTML = '';
+  renderLevel(blocks, browser, []);
+}
 
-  if (path.length > 0) {
-    const backButton = document.createElement("button");
-    backButton.textContent = "⬅ Back";
-    backButton.className = "back-button";
-    backButton.onclick = () => {
-      path.pop();
-      let level = blocks;
-      for (const p of path) {
-        level = level[p].children;
-      }
-      renderLevel(level);
-    };
-    browser.appendChild(backButton);
-  }
+function renderLevel(level, container, path) {
+  for (const key in level) {
+    const entry = level[key];
+    const fullPath = [...path, key].join("/");
 
-  for (const key in currentLevel) {
-    const entry = currentLevel[key];
+    const entryDiv = document.createElement("div");
+    entryDiv.className = "entry";
+
     const btn = document.createElement("button");
     btn.textContent = `${key} - ${entry.label}`;
 
     if (entry.children) {
+      btn.classList.add("folder-label");
       btn.onclick = () => {
-        path.push(key);
-        renderLevel(entry.children);
+        // Collapse siblings
+        const parentPath = path.join("/");
+        for (const expandedKey in expanded) {
+          if (expandedKey.startsWith(parentPath) && expandedKey !== fullPath && expandedKey.split("/").length === fullPath.split("/").length) {
+            delete expanded[expandedKey];
+          }
+        }
+
+        expanded[fullPath] = !expanded[fullPath];
+        render();
       };
     } else {
       btn.dataset.blockId = entry.id;
       btn.onclick = () => {
-        alert(`Selected block: ${entry.label}\nID: ${entry.id}`);
-        // Future: lookup transitions using entry.id
+        alert(`Selected: ${entry.label} (ID: ${entry.id})`);
       };
     }
 
-    browser.appendChild(btn);
+    entryDiv.appendChild(btn);
+    container.appendChild(entryDiv);
+
+    if (entry.children && expanded[fullPath]) {
+      const childContainer = document.createElement("div");
+      childContainer.className = "entry";
+      renderLevel(entry.children, childContainer, [...path, key]);
+      container.appendChild(childContainer);
+    }
   }
 }
 
-// Initial render
-renderLevel(blocks);
+render();
