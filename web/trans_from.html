@@ -45,8 +45,21 @@
     }
 
     .entry {
-      margin-left: 20px;
+      display: flex;
+      flex-direction: column; /* stack parent and children vertically */
       margin-top: 6px;
+    }
+
+    .entry > button {
+      align-self: flex-start; /* keep button aligned left */
+      margin-bottom: 4px;
+    }
+
+    .children {
+      display: flex;
+      flex-direction: row; /* children laid out horizontally */
+      margin-left: 40px; /* indent children */
+      gap: 8px; /* space between children */
     }
 
     button {
@@ -57,6 +70,7 @@
       font-size: 15px;
       border-radius: 6px;
       margin: 4px 0;
+      white-space: nowrap;
     }
 
     button:hover {
