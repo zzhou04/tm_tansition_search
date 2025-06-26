@@ -39,8 +39,6 @@ const blocks = {
 };
 
 const browser = document.getElementById("browser");
-
-// Tracks current expanded paths by level index, e.g. expandedPaths[0] = "1", expandedPaths[1] = "1/1-1"
 let expandedPaths = [];
 
 function renderLevelRow(nodes, pathPrefix) {
@@ -70,55 +68,48 @@ function renderLevelRow(nodes, pathPrefix) {
 
 function getNodeByPath(path) {
   const parts = path.split("/");
-  let node = blocks;
+  let node = null;
+  let level = blocks;
+
   for (const part of parts) {
-    if (!node[part]) return null;
-    node = node[part];
-    if (node.children) {
-      node = { ...node, children: node.children };
-    }
+    node = level[part];
+    if (!node) return null;
+    level = node.children || {};
   }
+
   return node;
 }
 
 function toggleNode(path) {
-  // Determine level of this path (number of segments)
   const level = path.split("/").length - 1;
 
-  // If already expanded at this level and same path, collapse it
   if (expandedPaths[level] === path) {
-    // Remove this and all deeper expansions
     expandedPaths = expandedPaths.slice(0, level);
   } else {
-    // Set/replace expansion at this level and clear deeper levels
     expandedPaths = expandedPaths.slice(0, level);
     expandedPaths[level] = path;
   }
 
-  // Re-render all rows according to expandedPaths
   renderAllLevels();
 }
 
 function renderAllLevels() {
   browser.innerHTML = "";
 
-  // Render top-level row
-  let nodes = blocks;
+  // Render level 0
+  let levelData = blocks;
   let currentPath = "";
 
-  let row = renderLevelRow(nodes, currentPath);
-  browser.appendChild(row);
+  browser.appendChild(renderLevelRow(levelData, currentPath));
 
-  // Render subsequent rows for each expanded path
   for (let i = 0; i < expandedPaths.length; i++) {
     currentPath = expandedPaths[i];
     const node = getNodeByPath(currentPath);
     if (!node || !node.children) break;
+    levelData = node.children;
 
-    row = renderLevelRow(node.children, currentPath);
-    browser.appendChild(row);
+    browser.appendChild(renderLevelRow(levelData, currentPath));
   }
 }
 
-// Initial render
 renderAllLevels();
