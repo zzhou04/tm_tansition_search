@@ -40,96 +40,106 @@ const blocks = {
 
 const browser = document.getElementById("browser");
 
-// State to track which nodes are expanded: map path string -> true/false
+// Tracks expanded folder paths (e.g., "1", "1/1-1")
 const expandedPaths = new Set();
 
-// Helper: get parent path (all but last segment)
 function getParentPath(path) {
   const parts = path.split("/");
   parts.pop();
   return parts.join("/");
 }
 
-// Render level row of siblings
+// Render siblings as buttons in a horizontal row
 function renderLevelRow(nodes, pathPrefix) {
   const row = document.createElement("div");
   row.className = "level-row";
-  row.dataset.levelPath = pathPrefix; // e.g. "", "1", "1/1-1"
+  row.dataset.levelPath = pathPrefix; // e.g., "", "1", "1/1-1"
 
   for (const key in nodes) {
     const node = nodes[key];
     const fullPath = pathPrefix ? `${pathPrefix}/${key}` : key;
+
     const button = document.createElement("button");
     button.textContent = `${key} - ${node.label}`;
+
     if (node.children) {
       button.classList.add("folder-label");
       button.onclick = () => toggleNode(fullPath);
     } else {
       button.onclick = () => alert(`Selected: ${node.label} (ID: ${node.id})`);
     }
+
     row.appendChild(button);
   }
+
   return row;
 }
 
-// Remove all rows below a given levelPath (used when collapsing or changing)
+// Remove all rows *below* the given level path (to collapse or reset deeper rows)
 function removeRowsBelow(levelPath) {
   const rows = Array.from(browser.querySelectorAll(".level-row"));
-  let foundIndex = rows.findIndex(r => r.dataset.levelPath === levelPath);
-  if (foundIndex === -1) return;
-  // Remove all rows after foundIndex
-  for (let i = rows.length - 1; i > foundIndex; i--) {
+  const index = rows.findIndex(r => r.dataset.levelPath === levelPath);
+  if (index === -1) return;
+
+  // Remove all rows after this index
+  for (let i = rows.length - 1; i > index; i--) {
     rows[i].remove();
   }
 }
 
-// Toggle a node open/closed
+// Toggle expand/collapse for a node at path
 function toggleNode(path) {
   const isExpanded = expandedPaths.has(path);
   const parentPath = getParentPath(path);
 
   if (isExpanded) {
-    // Collapse: remove all rows below this node's level (i.e. its children)
+    // Collapse node: remove all rows below this node
     expandedPaths.delete(path);
     removeRowsBelow(path);
   } else {
-    // Expand: remove rows below the parent level (to close siblings)
+    // Expand node: close siblings at same level first
     expandedPaths.add(path);
     removeRowsBelow(parentPath);
 
-    // Render children of the expanded node on next row below
+    // Render children row below the node's row
     const node = getNodeByPath(path);
     if (node && node.children) {
       const childrenRow = renderLevelRow(node.children, path);
-      // Insert after the row with levelPath = path
+
+      // Find row with dataset.levelPath === path
       const rows = Array.from(browser.querySelectorAll(".level-row"));
       const index = rows.findIndex(r => r.dataset.levelPath === path);
-      if (index !== -1) {
+
+      if (index === -1) {
+        // If no row found (should not happen), append at end
+        browser.appendChild(childrenRow);
+      } else {
+        // Insert children row after the node's row
         if (index === rows.length - 1) {
           browser.appendChild(childrenRow);
         } else {
           browser.insertBefore(childrenRow, rows[index + 1]);
         }
-      } else {
-        // If row doesn't exist (shouldn't happen), append at end
-        browser.appendChild(childrenRow);
       }
     }
   }
 }
 
-// Helper: traverse blocks object by path string like "1/1-1/1-1-2"
+// Traverse blocks tree by path string like "1/1-1/1-1-2"
 function getNodeByPath(path) {
   const parts = path.split("/");
   let node = blocks;
-  for (const p of parts) {
-    if (!node[p]) return null;
-    node = node[p].children || node[p];
+  for (const part of parts) {
+    if (!node[part]) return null;
+    node = node[part];
+    if (node.children) {
+      node = { ...node, children: node.children }; // keep children available
+    }
   }
   return node;
 }
 
-// Initial render: top-level row only
+// Initial render: top level row only
 function render() {
   browser.innerHTML = "";
   const topRow = renderLevelRow(blocks, "");
