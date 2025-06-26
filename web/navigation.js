@@ -40,65 +40,100 @@ const blocks = {
 
 const browser = document.getElementById("browser");
 
-function createEntry(key, node, path) {
-  const container = document.createElement("div");
-  container.className = "entry";
+// State to track which nodes are expanded: map path string -> true/false
+const expandedPaths = new Set();
 
-  const fullPath = [...path, key].join("/");
-  const button = document.createElement("button");
-  button.textContent = `${key} - ${node.label}`;
-
-  if (node.children) {
-    button.classList.add("folder-label");
-    button.dataset.path = fullPath;
-    button.onclick = () => toggleFolder(fullPath, container, node.children);
-  } else {
-    button.dataset.blockId = node.id;
-    button.onclick = () => alert(`Selected: ${node.label} (ID: ${node.id})`);
-  }
-
-  container.appendChild(button);
-  return container;
+// Helper: get parent path (all but last segment)
+function getParentPath(path) {
+  const parts = path.split("/");
+  parts.pop();
+  return parts.join("/");
 }
 
-function toggleFolder(path, parentContainer, children) {
-  let existing = parentContainer.querySelector(`[data-subpath="${path}"]`);
-  
-  if (existing) {
-    existing.remove();
-    return;
-  }
+// Render level row of siblings
+function renderLevelRow(nodes, pathPrefix) {
+  const row = document.createElement("div");
+  row.className = "level-row";
+  row.dataset.levelPath = pathPrefix; // e.g. "", "1", "1/1-1"
 
-  // Remove all siblings' open subfolders at this level or deeper
-  const level = path.split("/").length;
-  const siblings = browser.querySelectorAll(`[data-subpath]`);
-  siblings.forEach(el => {
-    const elPath = el.dataset.subpath;
-    if (elPath.startsWith(path.slice(0, path.lastIndexOf("/"))) && elPath.split("/").length >= level) {
-      el.remove();
+  for (const key in nodes) {
+    const node = nodes[key];
+    const fullPath = pathPrefix ? `${pathPrefix}/${key}` : key;
+    const button = document.createElement("button");
+    button.textContent = `${key} - ${node.label}`;
+    if (node.children) {
+      button.classList.add("folder-label");
+      button.onclick = () => toggleNode(fullPath);
+    } else {
+      button.onclick = () => alert(`Selected: ${node.label} (ID: ${node.id})`);
     }
-  });
-
-  // Create container for children horizontally below parent
-  const subContainer = document.createElement("div");
-  subContainer.className = "children";
-  subContainer.dataset.subpath = path;
-
-  for (const childKey in children) {
-    const childNode = children[childKey];
-    const childEntry = createEntry(childKey, childNode, path.split("/"));
-    subContainer.appendChild(childEntry);
+    row.appendChild(button);
   }
-
-  parentContainer.appendChild(subContainer);
+  return row;
 }
 
-function render() {
-  for (const key in blocks) {
-    const node = blocks[key];
-    const entry = createEntry(key, node, []);
-    browser.appendChild(entry);
+// Remove all rows below a given levelPath (used when collapsing or changing)
+function removeRowsBelow(levelPath) {
+  const rows = Array.from(browser.querySelectorAll(".level-row"));
+  let foundIndex = rows.findIndex(r => r.dataset.levelPath === levelPath);
+  if (foundIndex === -1) return;
+  // Remove all rows after foundIndex
+  for (let i = rows.length - 1; i > foundIndex; i--) {
+    rows[i].remove();
   }
+}
+
+// Toggle a node open/closed
+function toggleNode(path) {
+  const isExpanded = expandedPaths.has(path);
+  const parentPath = getParentPath(path);
+
+  if (isExpanded) {
+    // Collapse: remove all rows below this node's level (i.e. its children)
+    expandedPaths.delete(path);
+    removeRowsBelow(path);
+  } else {
+    // Expand: remove rows below the parent level (to close siblings)
+    expandedPaths.add(path);
+    removeRowsBelow(parentPath);
+
+    // Render children of the expanded node on next row below
+    const node = getNodeByPath(path);
+    if (node && node.children) {
+      const childrenRow = renderLevelRow(node.children, path);
+      // Insert after the row with levelPath = path
+      const rows = Array.from(browser.querySelectorAll(".level-row"));
+      const index = rows.findIndex(r => r.dataset.levelPath === path);
+      if (index !== -1) {
+        if (index === rows.length - 1) {
+          browser.appendChild(childrenRow);
+        } else {
+          browser.insertBefore(childrenRow, rows[index + 1]);
+        }
+      } else {
+        // If row doesn't exist (shouldn't happen), append at end
+        browser.appendChild(childrenRow);
+      }
+    }
+  }
+}
+
+// Helper: traverse blocks object by path string like "1/1-1/1-1-2"
+function getNodeByPath(path) {
+  const parts = path.split("/");
+  let node = blocks;
+  for (const p of parts) {
+    if (!node[p]) return null;
+    node = node[p].children || node[p];
+  }
+  return node;
+}
+
+// Initial render: top-level row only
+function render() {
+  browser.innerHTML = "";
+  const topRow = renderLevelRow(blocks, "");
+  browser.appendChild(topRow);
 }
 
 render();
