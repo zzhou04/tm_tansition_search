@@ -42,14 +42,17 @@
 
     #browser {
       padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    }
+
+    .entry {
+      margin-left: 20px;
+      margin-top: 6px;
     }
 
     .level-row {
       display: flex;
       gap: 12px;
+      margin-bottom: 12px;
     }
 
     button {
@@ -59,7 +62,6 @@
       cursor: pointer;
       font-size: 15px;
       border-radius: 6px;
-      white-space: nowrap;
     }
 
     button:hover {
@@ -68,6 +70,10 @@
 
     .folder-label {
       font-weight: bold;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
