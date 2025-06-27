@@ -33,7 +33,7 @@ const blocks = {
           "1-3-1": { label: "Banked Left", id: "road_banked_left" },
           "1-3-2": { label: "Banked Right", id: "road_banked_right" }
         }
-      },
+      }
     }
   },
   "2": {
