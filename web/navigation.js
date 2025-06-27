@@ -83,7 +83,7 @@ function renderLevelRow(nodes, pathPrefix) {
     const fullPath = pathPrefix ? `${pathPrefix}/${key}` : key;
 
     const button = document.createElement("button");
-    button.textContent = `${key} - ${node.label}`;
+    button.textContent = `${key}`;
 
     if (node.children) {
       button.classList.add("folder-label");
