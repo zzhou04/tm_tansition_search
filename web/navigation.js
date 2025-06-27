@@ -3,30 +3,37 @@ const blocks = {
     label: "Road",
     children: {
       "1-1": {
-        label: "Straight",
+        label: "RoadTechStraight",
         children: {
           "1-1-1": { label: "Straight 1", id: "road_straight_1" },
           "1-1-2": { label: "Straight 2", id: "road_straight_2" }
         }
       },
       "1-2": {
-        label: "Curves",
+        label: "RoadDirtStraight",
         children: {
           "1-2-1": { label: "Curve Left", id: "road_curve_left" },
           "1-2-2": { label: "Curve Right", id: "road_curve_right" }
         }
       },
       "1-3": {
-        label: "Banked",
+        label: "RoadBumpStraight",
         children: {
           "1-3-1": { label: "Banked Left", id: "road_banked_left" },
           "1-3-2": { label: "Banked Right", id: "road_banked_right" }
         }
       },
       "1-4": {
-        label: "Start Block",
+        label: "RoadIceStraight",
         id: "road_start"
-      }
+      },
+      "1-5": {
+        label: "RoadWaterStraight",
+        children: {
+          "1-3-1": { label: "Banked Left", id: "road_banked_left" },
+          "1-3-2": { label: "Banked Right", id: "road_banked_right" }
+        }
+      },
     }
   },
   "2": {
